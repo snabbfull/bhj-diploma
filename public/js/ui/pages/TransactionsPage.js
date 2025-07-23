@@ -180,15 +180,11 @@ class TransactionsPage {
    * используя getTransactionHTML
    * */
   renderTransactions(data) {
-    const content = this.element.querySelector('.content');
-    if (!content) return;
-    content.innerHTML = '';
-    if (Array.isArray(data) && data.length > 0) {
-      data.forEach(item => {
-        content.insertAdjacentHTML('beforeend', this.getTransactionHTML(item));
-      });
-    } else if (User.current()) {
-      content.innerHTML = '<div class="no-transactions">Нет транзакций</div>';
+    const container = this.element.querySelector('.content');
+    if (container) {
+      container.innerHTML = data.reduce((html, item) => {
+        return html + this.getTransactionHTML(item);
+      }, '');
     }
   }
 }

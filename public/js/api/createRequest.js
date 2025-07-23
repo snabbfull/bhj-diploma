@@ -9,41 +9,28 @@ const createRequest = (options = {}) => {
     let data = options.data || {};
     let callback = options.callback;
 
+    let sendData = null;
     if (method === 'GET' && data && Object.keys(data).length) {
         const params = new URLSearchParams(data).toString();
         url += (url.includes('?') ? '&' : '?') + params;
-        xhr.open(method, url);
-        xhr.responseType = 'json';
-        xhr.onload = function () {
-            if (xhr.status >= 200 && xhr.status < 300) {
-                callback(null, xhr.response);
-            } else {
-                callback(`Error: ${xhr.status}`, null);
-            }
-        };
-        xhr.onerror = function () {
-            callback('Network error', null);
-        };
-        xhr.send();
-    } else {
-        xhr.open(method, url);
-        xhr.responseType = 'json';
-        xhr.onload = function () {
-            if (xhr.status >= 200 && xhr.status < 300) {
-                callback(null, xhr.response);
-            } else {
-                callback(`Error: ${xhr.status}`, null);
-            }
-        };
-        xhr.onerror = function () {
-            callback('Network error', null);
-        };
+    } else if (method !== 'GET') {
+        // Для не-GET методов используем FormData
         const formData = new FormData();
         if (data && typeof data === 'object') {
             Object.entries(data).forEach(([key, value]) => {
                 formData.append(key, value);
             });
         }
-        xhr.send(formData);
+        sendData = formData;
     }
+
+    xhr.open(method, url);
+    xhr.responseType = 'json';
+    xhr.onload = function () {
+        callback(null, xhr.response);
+    };
+    xhr.onerror = function () {
+        callback('Network error', null);
+    };
+    xhr.send(sendData);
 };
